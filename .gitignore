@@ -1,0 +1,21 @@
+# Local IDE settings
+.idea/
+.vscode/
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+
+# Temporary files and reports
+tmp/
+*.log
+coverage/
+coverage.out
+
+# OS metadata
+.DS_Store
+Thumbs.db
