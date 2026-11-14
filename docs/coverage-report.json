@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-11-14T11:46:12.638Z",
+  "methodology": "Go: unique lines in instrumented coverprofile ranges (end column 1 is exclusive), union of hits for overlapping blocks. React: V8 executable-line coverage. Weighted total by line counts. Includes application commands and mock service; excludes dependencies, generated assets and tests.",
+  "go": {
+    "total": 1487,
+    "covered": 1319,
+    "percent": 88.7
+  },
+  "frontend": {
+    "total": 160,
+    "covered": 157,
+    "percent": 98.13
+  },
+  "total": {
+    "total": 1647,
+    "covered": 1476,
+    "percent": 89.62
+  },
+  "goFiles": {
+    "onbo/cmd/eval/main.go": {
+      "total": 162,
+      "covered": 153
+    },
+    "onbo/cmd/mock/main.go": {
+      "total": 39,
+      "covered": 30
+    },
+    "onbo/cmd/onbo/main.go": {
+      "total": 52,
+      "covered": 45
+    },
+    "onbo/internal/agent/agent.go": {
+      "total": 133,
+      "covered": 131
+    },
+    "onbo/internal/agent/client.go": {
+      "total": 223,
+      "covered": 201
+    },
+    "onbo/internal/agent/demo.go": {
+      "total": 82,
+      "covered": 74
+    },
+    "onbo/internal/agent/trace.go": {
+      "total": 7,
+      "covered": 7
+    },
+    "onbo/internal/backend/server.go": {
+      "total": 281,
+      "covered": 245
+    },
+    "onbo/internal/backend/session.go": {
+      "total": 26,
+      "covered": 26
+    },
+    "onbo/internal/backend/store.go": {
+      "total": 357,
+      "covered": 290
+    },
+    "onbo/internal/mock/server.go": {
+      "total": 125,
+      "covered": 117
+    }
+  }
+}

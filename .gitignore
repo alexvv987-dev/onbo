@@ -11,7 +11,8 @@ reports/
 *.tsbuildinfo
 certs/
 agent-coverage.out
-output/video/raw/
+/output/pdf/
+/output/video/
 output/*.zip
 
 # Local environment and credentials
