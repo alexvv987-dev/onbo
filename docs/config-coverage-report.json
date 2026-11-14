@@ -1,0 +1,97 @@
+{
+  "generatedAt": "2026-11-14T14:13:35.885Z",
+  "methodology": "Go: unique lines in instrumented coverprofile ranges (end column 1 is exclusive), union of hits for overlapping blocks. React: V8 executable-line coverage. Weighted total by line counts. Includes application commands and mock service; excludes dependencies, generated assets and tests.",
+  "go": {
+    "total": 1902,
+    "covered": 1713,
+    "percent": 90.06
+  },
+  "frontend": {
+    "total": 160,
+    "covered": 157,
+    "percent": 98.13
+  },
+  "total": {
+    "total": 2062,
+    "covered": 1870,
+    "percent": 90.69
+  },
+  "goFiles": {
+    "onbo/cmd/eval/main.go": {
+      "total": 166,
+      "covered": 155
+    },
+    "onbo/cmd/mock/config.go": {
+      "total": 3,
+      "covered": 3
+    },
+    "onbo/cmd/mock/main.go": {
+      "total": 36,
+      "covered": 29
+    },
+    "onbo/cmd/onbo/config.go": {
+      "total": 3,
+      "covered": 3
+    },
+    "onbo/cmd/onbo/main.go": {
+      "total": 45,
+      "covered": 36
+    },
+    "onbo/internal/agent/agent.go": {
+      "total": 133,
+      "covered": 131
+    },
+    "onbo/internal/agent/client.go": {
+      "total": 228,
+      "covered": 206
+    },
+    "onbo/internal/agent/config.go": {
+      "total": 14,
+      "covered": 12
+    },
+    "onbo/internal/agent/demo.go": {
+      "total": 82,
+      "covered": 74
+    },
+    "onbo/internal/agent/trace.go": {
+      "total": 7,
+      "covered": 7
+    },
+    "onbo/internal/backend/server.go": {
+      "total": 304,
+      "covered": 270
+    },
+    "onbo/internal/backend/session.go": {
+      "total": 34,
+      "covered": 32
+    },
+    "onbo/internal/backend/store.go": {
+      "total": 345,
+      "covered": 278
+    },
+    "onbo/internal/config/config.go": {
+      "total": 12,
+      "covered": 12
+    },
+    "onbo/internal/config/defaults.go": {
+      "total": 45,
+      "covered": 41
+    },
+    "onbo/internal/config/load.go": {
+      "total": 138,
+      "covered": 127
+    },
+    "onbo/internal/config/validate.go": {
+      "total": 113,
+      "covered": 113
+    },
+    "onbo/internal/config/yaml.go": {
+      "total": 63,
+      "covered": 61
+    },
+    "onbo/internal/mock/server.go": {
+      "total": 131,
+      "covered": 123
+    }
+  }
+}

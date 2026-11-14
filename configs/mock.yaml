@@ -1,0 +1,12 @@
+# Secrets and DATABASE_URL are supplied only through environment variables.
+http:
+  address: ':8081'
+  read_header_timeout: 5s
+  read_timeout: 10s
+  write_timeout: 10s
+  idle_timeout: 60s
+lifecycle:
+  init_timeout: 15s
+  shutdown_timeout: 10s
+health_timeout: 1s
+max_request_bytes: 16384
