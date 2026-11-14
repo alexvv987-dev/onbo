@@ -1,176 +1,24 @@
 :root {
-  --ds-color-ink: #25382f;
-  --ds-color-muted: #728078;
-  --ds-color-brand: #00aaff;
-  --ds-color-brand-bright: #0096e6;
-  --ds-color-surface: #f5f5f5;
-  --ds-color-border: #e8e8e8;
-  --ds-color-success-surface: #e8f7ee;
-  --ds-radius-sm: 6px;
-  --ds-radius-md: 12px;
-  --ds-radius-lg: 18px;
-  --ds-space-1: 4px;
-  --ds-space-2: 8px;
-  --ds-space-3: 12px;
-  --ds-space-4: 16px;
-  --ds-space-5: 24px;
-  --ds-space-6: 32px;
-}
-
-.button-primary {
-  background: var(--ds-color-brand);
-  border: 1px solid var(--ds-color-brand);
-  border-radius: var(--ds-radius-sm);
-  color: #fff;
-}
-
-.button-primary:hover:not(:disabled) {
-  background: var(--ds-color-brand-bright);
-}
-
-/* Avito-inspired visual layer: white canvas, bright blue actions and soft cards. */
-body {
-  background: #fff;
-  color: #111;
-}
-
-.app-shell {
-  background: #fff;
-}
-
-.topbar {
-  height: 76px;
-  padding: 0 32px;
-  border-bottom-color: var(--ds-color-border);
-}
-
-.brand {
-  color: #111;
-  letter-spacing: -1.2px;
-}
-
-.brand-mark {
-  background: var(--ds-color-brand);
-  border-radius: 10px;
-}
-
-.brand-mark span {
-  background: #a9e44d;
-  border-color: var(--ds-color-brand);
-}
-
-.brand-dot,
-.greeting-dot,
-.section-heading h1 em,
-.login-copy h1 em {
-  color: var(--ds-color-brand);
-}
-
-.small-orbit,
-.assistant-symbol {
-  color: var(--ds-color-brand);
-}
-
-.login-card {
-  box-shadow: 0 10px 30px #1111110d;
-}
-
-.login-card select {
-  border-color: #dedede;
-  background: #f7f7f7;
-}
-
-.login-path span {
-  color: #777;
-}
-
-.header-context,
-.eyebrow,
-.composer-footnote,
-.test-note {
-  color: #777;
-}
-
-.demo-tag,
-.model-tag {
-  background: #f5f5f5;
-  border-color: #e5e5e5;
-  color: #666;
-}
-
-.demo-tag > span,
-.model-tag > span {
-  background: var(--ds-color-brand);
-}
-
-.workspace {
-  gap: 32px;
-  padding: 28px 32px 0;
-}
-
-.section-heading,
-.plan-panel {
-  border-color: var(--ds-color-border);
-}
-
-.composer,
-.login-card,
-.draft-card,
-.request-card,
-.source-card {
-  border-color: var(--ds-color-border);
-  background: #fff;
-  border-radius: var(--ds-radius-md);
-}
-
-.composer:focus-within {
-  border-color: var(--ds-color-brand);
-  box-shadow: 0 0 0 3px #00aaff22;
-}
-
-.primary-button,
-.button-primary,
-.send-button {
-  background: var(--ds-color-brand);
-  border-color: var(--ds-color-brand);
-}
-
-.primary-button:hover:not(:disabled),
-.button-primary:hover:not(:disabled),
-.send-button:not(:disabled):hover {
-  background: var(--ds-color-brand-bright);
-}
-
-.send-button:disabled {
-  background: #b9e5f8;
-}
-
-.user-message {
-  background: #f0f0f0;
-}
-
-.user-message .message-author,
-.assistant-message .message-author {
-  color: #555;
-}
-
-.task-item,
-.request-card {
-  background: #fff;
-  border-color: #e8e8e8;
-}
-
-.task-item:hover {
-  background: #f7fbfd;
-}
-
-.suggestions button:hover {
-  background: #f0f9ff;
-  border-color: #8bd7ff;
-}
-
-.task-list,
-.requests-section {
-  background: #f7f7f7;
-  border-radius: var(--ds-radius-md);
+  --color-text: #141414;
+  --color-secondary: #6b6b6b;
+  --color-muted: #757575;
+  --color-blue: #00aaff;
+  --color-blue-hover: #0098e5;
+  --color-surface: #f5f5f5;
+  --color-border: #e6e6e6;
+  --color-success: #167947;
+  --color-success-bg: #eaf7ef;
+  --color-pending: #8d5900;
+  --color-pending-bg: #fff5dc;
+  --color-danger: #b63440;
+  --color-danger-bg: #fff0f1;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
 }

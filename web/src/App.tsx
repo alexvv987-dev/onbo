@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { api, ApiError, errorText } from "./api";
+import avitoMark from "./avito-mark.png";
 import { trackMetric } from "./metrics";
 import type {
   AccessRequest,
@@ -40,6 +41,31 @@ function Arrow() {
   );
 }
 
+function TopicIcon({ index }: { index: number }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {index === 0 ? (
+        <path d="M6 3h9l4 4v14H6V3Zm8 0v5h5M9 12h7M9 16h5" />
+      ) : index === 1 ? (
+        <path d="M15 14a5 5 0 1 0-5-5c0 .7.1 1.3.4 1.9L3 18.3V21h3v-3h3v-3l2.1-2.1c.8.7 1.8 1.1 3 1.1ZM16 7h.01" />
+      ) : (
+        <>
+          <circle cx="12" cy="8" r="3.5" />
+          <path d="M5 21v-2a7 7 0 0 1 14 0v2M19 5a3.5 3.5 0 0 1 0 7M22 21v-2a7 7 0 0 0-2-5" />
+        </>
+      )}
+    </svg>
+  );
+}
+
 export default function App() {
   const [profiles, setProfiles] = useState<User[]>([]);
   const [profileId, setProfileId] = useState("intern-platform");
@@ -56,7 +82,8 @@ export default function App() {
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const bottom = useRef<HTMLDivElement>(null);
+  const [mobileView, setMobileView] = useState<"chat" | "plan">("chat");
+  const chatScroll = useRef<HTMLDivElement>(null);
   const textarea = useRef<HTMLTextAreaElement>(null);
 
   async function loadWorkspace() {
@@ -101,7 +128,9 @@ export default function App() {
     void boot();
   }, []);
   useEffect(() => {
-    bottom.current?.scrollIntoView?.({ behavior: "smooth", block: "end" });
+    if (chatScroll.current) {
+      chatScroll.current.scrollTop = chatScroll.current.scrollHeight;
+    }
   }, [messages, busy]);
 
   async function signIn(id: string) {
@@ -135,8 +164,10 @@ export default function App() {
     try {
       const reply = await api.chat(text);
       trackMetric("question_asked");
-      if (reply.sources?.length) trackMetric("source_shown", { count: String(reply.sources.length) });
-      if (reply.draft) trackMetric("draft_created", { resourceId: reply.draft.resourceId });
+      if (reply.sources?.length)
+        trackMetric("source_shown", { count: String(reply.sources.length) });
+      if (reply.draft)
+        trackMetric("draft_created", { resourceId: reply.draft.resourceId });
       setMessages((previous) => [
         ...previous,
         { role: "user", text },
@@ -204,7 +235,9 @@ export default function App() {
       const result = status
         ? await api.simulate(request.id, status)
         : await api.refresh(request.id);
-      trackMetric(status ? "request_result" : "request_refreshed", { status: result.status });
+      trackMetric(status ? "request_result" : "request_refreshed", {
+        status: result.status,
+      });
       setRequests((previous) =>
         previous.map((item) =>
           item.draftId === result.draftId ? result : item,
@@ -226,43 +259,55 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <header className="topbar">
-        <a href="/" className="brand" aria-label="Онбо, главная">
-          <span className="brand-mark" aria-hidden="true">
-	            <i />
-	            <i />
-	            <i />
-	            <i />
-          </span>
-          онбо<span className="brand-dot">.</span>
-        </a>
-        <div className="header-context">
-          <span className="header-divider" />
-          <span>Помощь · Инструкции · Доступы</span>
+      <div className="utility-bar">
+        <div className="page-width utility-content">
+          <span>Стажировка в Авито</span>
+          <span className="demo-tag">Учебный прототип</span>
         </div>
-        <div className="header-right">
-          <span className="demo-tag">
-            <span />
-            Демо-прототип
-          </span>
+      </div>
+      <header className="topbar">
+        <div className="page-width header-content">
+          <a href="/" className="brand" aria-label="Онбо, главная">
+            <img
+              className="brand-mark"
+              src={avitoMark}
+              alt=""
+              width={40}
+              height={40}
+            />
+            <span className="brand-name">онбо</span>
+          </a>
+          <span className="brand-caption">Помощник стажёра</span>
           {user && (
-            <label className="profile-control">
-              <span className="avatar">{user.name.charAt(0)}</span>
-              <span className="sr-only">Тестовый профиль</span>
-              <select
-                aria-label="Тестовый профиль"
-                value={profileId}
-                disabled={!!busy || loading}
-                onChange={(event) => void signIn(event.target.value)}
-              >
-                {profiles.map((profile) => (
-                  <option key={profile.id} value={profile.id}>
-                    {profile.name} · {profile.team}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <nav className="header-nav" aria-label="Основная навигация">
+              <a href="#workspace" onClick={() => setMobileView("chat")}>
+                Помощник
+              </a>
+              <a href="#onboarding-plan" onClick={() => setMobileView("plan")}>
+                Мой план
+              </a>
+            </nav>
           )}
+          <div className="header-right">
+            {user && (
+              <label className="profile-control">
+                <span className="avatar">{user.name.charAt(0)}</span>
+                <span className="sr-only">Тестовый профиль</span>
+                <select
+                  aria-label="Тестовый профиль"
+                  value={profileId}
+                  disabled={!!busy || loading}
+                  onChange={(event) => void signIn(event.target.value)}
+                >
+                  {profiles.map((profile) => (
+                    <option key={profile.id} value={profile.id}>
+                      {profile.name} · {profile.team}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </div>
         </div>
       </header>
 
@@ -274,26 +319,40 @@ export default function App() {
       ) : !user ? (
         <main className="login-layout">
           <div className="login-copy">
-            <p className="eyebrow">ПЕРВЫЕ ДНИ В НОВОЙ КОМАНДЕ</p>
+            <p className="eyebrow">Онбо для стажёров</p>
             <h1>
-              Освоиться проще,
-              <br />
-              когда есть <em>Онбо.</em>
+              Первый день
+              <br />в новой команде
             </h1>
             <p>
-              Разберёмся с инструкциями, доступами и первыми задачами. Шаг за
-              шагом, в твоём темпе.
+              Найдите рабочие инструкции, получите доступы и узнайте, с какой
+              задачи начать.
             </p>
             <div className="login-path">
-              <span>01 Знакомство</span>
-              <span>02 Инструменты</span>
-              <span>03 Первая задача</span>
+              <div>
+                <TopicIcon index={0} />
+                <span>
+                  <strong>Инструкции под рукой</strong>Ответы со ссылками на
+                  материалы команды
+                </span>
+              </div>
+              <div>
+                <TopicIcon index={1} />
+                <span>
+                  <strong>Помощь с доступами</strong>От заявки до
+                  подтверждённого результата
+                </span>
+              </div>
+              <div>
+                <TopicIcon index={2} />
+                <span>
+                  <strong>Понятный план</strong>Что уже готово и что делать
+                  дальше
+                </span>
+              </div>
             </div>
           </div>
           <section className="login-card">
-            <span className="small-orbit" aria-hidden="true">
-              о.
-            </span>
             <h2>Давай знакомиться</h2>
             <p>Выбери тестовый профиль, чтобы пройти путь стажёра.</p>
             <label htmlFor="initial-profile">Тестовый профиль</label>
@@ -324,15 +383,49 @@ export default function App() {
           </section>
         </main>
       ) : (
-        <main className="workspace">
-          <section className="chat-panel" aria-label="Чат с Онбо">
+        <main
+          className="workspace page-width"
+          id="workspace"
+          data-mobile-view={mobileView}
+        >
+          <div className="workspace-intro">
+            <p className="eyebrow">Личное пространство · {user.team}</p>
+            <h1>На связи, {user.name.split(" ")[0]}.</h1>
+            <p>Здесь всё, что поможет разобраться в первых задачах.</p>
+          </div>
+          <div
+            className="workspace-tabs"
+            aria-label="Разделы рабочего пространства"
+          >
+            <button
+              type="button"
+              aria-pressed={mobileView === "chat"}
+              aria-controls="assistant-panel"
+              onClick={() => setMobileView("chat")}
+            >
+              Помощник
+            </button>
+            <button
+              type="button"
+              aria-pressed={mobileView === "plan"}
+              aria-controls="onboarding-plan"
+              onClick={() => setMobileView("plan")}
+            >
+              Мой план{" "}
+              <span>
+                {done}/{taskCount}
+              </span>
+            </button>
+          </div>
+          <section
+            className="chat-panel"
+            id="assistant-panel"
+            aria-label="Чат с Онбо"
+          >
             <div className="section-heading">
               <div>
-                <p className="eyebrow">ЛИЧНЫЙ ПОМОЩНИК</p>
-                <h1>
-                  На связи, {user.name.split(" ")[0]}
-                  <span className="greeting-dot">.</span>
-                </h1>
+                <h2>Чат с Онбо</h2>
+                <p>Ответы по материалам вашей команды</p>
               </div>
               <span className="model-tag">
                 <span />
@@ -341,22 +434,17 @@ export default function App() {
             </div>
             <div
               className="chat-scroll"
+              ref={chatScroll}
               aria-live="polite"
               aria-busy={busy === "chat"}
             >
               {!messages.length && (
                 <div className="empty-chat">
-                  <span className="assistant-symbol" aria-hidden="true">
-                    о<span>✦</span>
-                  </span>
-                  <h2>С чего начнём?</h2>
-                  <p>
-                    Я помогу найти нужную инструкцию,
-                    <br />
-                    понять следующий шаг и подготовить заявку.
-                  </p>
+                  <p className="empty-caption">Начнём с простого</p>
+                  <h3>Что хотите узнать?</h3>
+                  <p>Спросите о процессах команды или выберите вопрос ниже.</p>
                   <div className="suggestions">
-                    {suggestions.map((text) => (
+                    {suggestions.map((text, index) => (
                       <button
                         key={text}
                         disabled={!!busy}
@@ -365,8 +453,8 @@ export default function App() {
                           textarea.current?.focus();
                         }}
                       >
-                        {text}
-                        <Arrow />
+                        <TopicIcon index={index} />
+                        <span>{text}</span>
                       </button>
                     ))}
                   </div>
@@ -453,7 +541,6 @@ export default function App() {
                   Онбо разбирается в вопросе…
                 </div>
               )}
-              <div ref={bottom} />
             </div>
             <form className="composer" onSubmit={(event) => void send(event)}>
               <label htmlFor="message-input" className="sr-only">
@@ -464,9 +551,9 @@ export default function App() {
                 id="message-input"
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
-                placeholder="Спроси о первых шагах, инструкциях или доступах…"
+                placeholder="Задайте вопрос об инструкциях, доступах или первых задачах"
                 rows={2}
-                maxLength={4000}
+                maxLength={3000}
                 disabled={!!busy}
                 onKeyDown={(event) => {
                   if (
@@ -494,19 +581,19 @@ export default function App() {
             </div>
           </section>
 
-          <aside className="plan-panel" aria-label="План адаптации">
+          <aside
+            className="plan-panel"
+            id="onboarding-plan"
+            aria-label="План адаптации"
+          >
             <div className="plan-heading">
               <div>
-                <p className="eyebrow">ТВОЙ МАРШРУТ</p>
+                <p className="eyebrow">План адаптации</p>
                 <h2>Первые шаги</h2>
               </div>
-              <span className="week-tag">Старт</span>
-            </div>
-            <div className="progress-label">
-              <span>Маленькие шаги. Большой старт.</span>
-              <strong>
-                {done}/{taskCount}
-              </strong>
+              <span className="week-tag">
+                {done} из {taskCount}
+              </span>
             </div>
             <progress
               className="progress-track"
@@ -546,7 +633,6 @@ export default function App() {
                             : task.id === "first-task"
                               ? "Задача выполнена"
                               : "Ознакомился"}
-                          <span aria-hidden="true"> ↗</span>
                         </button>
                       )}
                   </div>
@@ -554,11 +640,8 @@ export default function App() {
               ))}
             </ol>
             <div className="next-step">
-              <span className="next-icon" aria-hidden="true">
-                ↗
-              </span>
               <div>
-                <span className="mini-label">СЛЕДУЮЩИЙ ШАГ</span>
+                <span className="mini-label">Следующий шаг</span>
                 <p>{plan?.nextStep || "Загружаем план…"}</p>
               </div>
             </div>
@@ -614,12 +697,8 @@ export default function App() {
               </section>
             )}
             <div className="mentor-note">
-              <span aria-hidden="true">☏</span>
-              <p>
-                Онбо помогает с рутиной.
-                <br />
-                <strong>Наставник остаётся рядом.</strong>
-              </p>
+              <TopicIcon index={2} />
+              <p>Сложный вопрос лучше обсудить с наставником своей команды.</p>
             </div>
           </aside>
         </main>
@@ -663,9 +742,9 @@ export default function App() {
           </button>
         </div>
       )}
-      <footer className="site-footer">
-        <span>Онбо — рядом с первого дня.</span>
-        <span>Учебный прототип · Hack&amp;Change 2026</span>
+      <footer className="site-footer page-width">
+        <span>Онбо · Hack&amp;Change 2026</span>
+        <span>Тестовые профили, инструкции и сервисы</span>
       </footer>
     </div>
   );
