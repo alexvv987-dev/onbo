@@ -1,0 +1,15 @@
+.git
+.env
+.env.*
+!.env.example
+node_modules
+web/node_modules
+web/dist
+web/coverage
+tmp
+output
+reports
+roadmap.md
+*.log
+*.pem
+*.key

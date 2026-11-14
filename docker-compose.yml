@@ -1,0 +1,76 @@
+name: onbo
+services:
+  postgres:
+    image: postgres:17-alpine@sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73
+    environment:
+      POSTGRES_DB: onbo
+      POSTGRES_USER: onbo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-onbo-demo-local}
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U onbo -d onbo"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  redis:
+    image: redis:7.4-alpine@sha256:7f7d30b7fdd09467bac58198a1f166dd69789d348d4fe859cccb20e0cf287fbe
+    command: [redis-server, --appendonly, "yes"]
+    ports:
+      - "127.0.0.1:16379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  mock:
+    build: .
+    entrypoint: [/app/mock]
+    environment:
+      CONFIG_FILE: /app/configs/mock.yaml
+      HTTP_ADDR: ":8081"
+      DATABASE_URL: postgres://onbo:${POSTGRES_PASSWORD:-onbo-demo-local}@postgres:5432/onbo?sslmode=disable
+      MOCK_TOKEN: ${MOCK_TOKEN:-local-demo-service-token}
+    ports:
+      - "127.0.0.1:8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD-SHELL, "wget -q -O /dev/null http://127.0.0.1:8081/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  app:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      CONFIG_FILE: /app/configs/onbo.yaml
+      DATABASE_URL: postgres://onbo:${POSTGRES_PASSWORD:-onbo-demo-local}@postgres:5432/onbo?sslmode=disable
+      REDIS_ADDR: redis:6379
+      MOCK_URL: http://mock:8081
+      MOCK_TOKEN: ${MOCK_TOKEN:-local-demo-service-token}
+      DEMO_MODE: ${DEMO_MODE:-true}
+      LLM_MODE: ${LLM_MODE:-demo}
+      HTTP_ADDR: ":8080"
+      STATIC_DIR: /app/web/dist
+    volumes:
+      - ./certs:/app/certs:ro
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mock:
+        condition: service_healthy
+volumes:
+  postgres_data:
+  redis_data:
