@@ -1,0 +1,29 @@
+:root {
+  --ds-color-ink: #25382f;
+  --ds-color-muted: #728078;
+  --ds-color-brand: #16664f;
+  --ds-color-brand-bright: #168160;
+  --ds-color-surface: #f5f6f2;
+  --ds-color-border: #e0e5db;
+  --ds-color-success-surface: #eaf0e5;
+  --ds-radius-sm: 6px;
+  --ds-radius-md: 12px;
+  --ds-radius-lg: 18px;
+  --ds-space-1: 4px;
+  --ds-space-2: 8px;
+  --ds-space-3: 12px;
+  --ds-space-4: 16px;
+  --ds-space-5: 24px;
+  --ds-space-6: 32px;
+}
+
+.button-primary {
+  background: var(--ds-color-brand);
+  border: 1px solid var(--ds-color-brand);
+  border-radius: var(--ds-radius-sm);
+  color: #fff;
+}
+
+.button-primary:hover:not(:disabled) {
+  background: var(--ds-color-brand-bright);
+}

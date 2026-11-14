@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { api, ApiError, errorText } from "./api";
+import { trackMetric } from "./metrics";
 import type {
   AccessRequest,
   Config,
@@ -87,6 +88,7 @@ export default function App() {
       if (current) {
         setProfileId(current.id);
         await loadWorkspace();
+        trackMetric("plan_opened");
       }
     } catch (failure) {
       setError(errorText(failure));
@@ -132,6 +134,9 @@ export default function App() {
     setNotice("");
     try {
       const reply = await api.chat(text);
+      trackMetric("question_asked");
+      if (reply.sources?.length) trackMetric("source_shown", { count: String(reply.sources.length) });
+      if (reply.draft) trackMetric("draft_created", { resourceId: reply.draft.resourceId });
       setMessages((previous) => [
         ...previous,
         { role: "user", text },
@@ -156,6 +161,7 @@ export default function App() {
     setError("");
     try {
       setPlan(await api.complete(id));
+      trackMetric("task_completed", { taskId: id });
     } catch (failure) {
       setError(errorText(failure));
     } finally {
@@ -169,6 +175,7 @@ export default function App() {
     setNotice("");
     try {
       const result = await api.confirm(draft.id);
+      trackMetric("request_confirmed", { requestId: result.id });
       setRequests((previous) => [
         ...previous.filter((item) => item.draftId !== result.draftId),
         result,
@@ -197,6 +204,7 @@ export default function App() {
       const result = status
         ? await api.simulate(request.id, status)
         : await api.refresh(request.id);
+      trackMetric(status ? "request_result" : "request_refreshed", { status: result.status });
       setRequests((previous) =>
         previous.map((item) =>
           item.draftId === result.draftId ? result : item,
@@ -299,7 +307,7 @@ export default function App() {
               ))}
             </select>
             <button
-              className="primary-button"
+              className="primary-button button-primary"
               disabled={!!busy || !profiles.length}
               onClick={() => void signIn(profileId)}
             >
@@ -414,7 +422,7 @@ export default function App() {
                             твоего подтверждения.
                           </p>
                           <button
-                            className="primary-button"
+                            className="primary-button button-primary"
                             disabled={!!busy || !!submitted}
                             onClick={() => void confirm(draft)}
                           >

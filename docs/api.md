@@ -12,6 +12,8 @@
 - `GET /api/requests` → `AccessRequest[]`; `POST /api/requests/{id}/refresh {}` → `AccessRequest`.
 - `POST /api/demo/requests/{id}/status {status}` → `AccessRequest`, только при DEMO_MODE=true, status `granted` или `rejected`; обновляет имитацию и локальный результат.
 - `GET /api/messages` → `Message[]`; `POST /api/chat {message}` → `ChatReply`; сохраняются вопрос и ответ, профиль из сессии. Ошибка LLM возвращает 502/504 и не выдаётся за ответ модели.
+- `GET /api/mcp/tools` → каталог локальных MCP-действий текущего прототипа.
+- `POST /api/events {name,metadata}` → 204; сохраняет обезличенное продуктовое событие текущей сессии.
 - `GET /healthz` → 200 при готовности.
 
 Типы находятся в `internal/core/types.go`. UI использует message из ChatReply как text assistant-сообщения. Статусы задач: `todo`, `blocked`, `pending`, `done`, `rejected`. Статусы заявок: `submitting` (исход ещё неизвестен), `pending`, `granted`, `rejected`. Только granted завершает шаг доступа. Два первых шага ручные, третий автоматический, четвёртый ручной после granted.

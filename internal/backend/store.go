@@ -16,6 +16,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"onbo/internal/config"
 	"onbo/internal/core"
+	"onbo/internal/metrics"
 )
 
 const (
@@ -35,6 +36,7 @@ const (
  CREATE TABLE IF NOT EXISTS onbo_operations(id text PRIMARY KEY,draft_id text UNIQUE NOT NULL,user_id text NOT NULL,resource_id text NOT NULL,external_id text NOT NULL DEFAULT '',status text NOT NULL DEFAULT '` +
 		core.RequestSubmitting + `',message text NOT NULL DEFAULT 'Результат ещё не подтверждён. Повторите проверку.',created_at timestamptz NOT NULL DEFAULT now());
  CREATE TABLE IF NOT EXISTS onbo_messages(id bigserial PRIMARY KEY,user_id text NOT NULL,body jsonb NOT NULL);
+ CREATE TABLE IF NOT EXISTS onbo_events(id bigserial PRIMARY KEY,user_id text NOT NULL,name text NOT NULL,metadata jsonb NOT NULL,created_at timestamptz NOT NULL DEFAULT now());
  INSERT INTO onbo_documents(id,team,title,content) VALUES
  ('team-platform','Платформа','Знакомство с командой платформы','Тестовая инструкция, не регламент Авито. Ваш наставник — Алексей (синтетический профиль), канал помощи — #platform-interns. Начните со знакомства с командой и изучения процесса разработки.'),
  ('workflow','Платформа','Как подготовиться к первой задаче','Тестовая инструкция, не регламент Авито. Для подготовки окружения прочитайте инструкцию и получите доступ к учебному репозиторию training-repo. Создайте заявку с причиной «Подготовка к первой учебной задаче», дождитесь статуса «Доступ выдан», затем переходите к первой задаче.'),
@@ -46,6 +48,7 @@ const (
 	insertAccessDraftQuery         = "INSERT INTO onbo_drafts(id,user_id,resource_id,reason) VALUES($1,$2,$3,$4)"
 	insertAccessOperationQuery     = "INSERT INTO onbo_operations(id,draft_id,user_id,resource_id) VALUES($1,$2,$3,$4) ON CONFLICT(draft_id) DO NOTHING"
 	insertChatMessageQuery         = "INSERT INTO onbo_messages(user_id,body) VALUES($1,$2)"
+	insertMetricEventQuery         = "INSERT INTO onbo_events(user_id,name,metadata) VALUES($1,$2,$3)"
 	insertTaskProgressQuery        = "INSERT INTO onbo_progress(user_id,task_id) VALUES($1,$2) ON CONFLICT DO NOTHING"
 	instructionsTaskDescription    = "Разберитесь с процессом подготовки к первой задаче."
 	instructionsTaskTitle          = "Изучить рабочую инструкцию"
@@ -103,6 +106,18 @@ type Store struct {
 	Pool               *pgxpool.Pool
 	MockURL, MockToken string
 	Client             *http.Client
+}
+
+func (store *Store) RecordMetricEvent(ctx context.Context, user core.User, event metrics.Event) error {
+	if err := event.Validate(); err != nil {
+		return ErrInvalid
+	}
+	metadata, err := json.Marshal(event.Metadata)
+	if err != nil {
+		return err
+	}
+	_, err = store.Pool.Exec(ctx, insertMetricEventQuery, user.ID, event.Name, metadata)
+	return err
 }
 
 func NewStore(ctx context.Context, databaseURL, mockURL, mockToken string, options ...config.AccessService) (*Store, error) {

@@ -35,9 +35,12 @@ text(journey, 'Подтверждение заявки, номер сервис�
 
 const action = slide('Результат действия');
 text(action, 'Стажёр подтверждает\nресурс и причину.\n\nСервис возвращает\nномер заявки\nи статус доступа.', 72, 190, 320, 340, 30);
-text(action, 'Тестовые данные\nи имитация сервиса', 72, 560, 310, 70, 20, false, color.muted);
-action.images.add({ blob: new Uint8Array(await fs.readFile('reports/screenshots/draft-card.png')), contentType: 'image/png', alt: 'Подтверждённая заявка в работающем прототипе', fit: 'contain', position: { left: 430, top: 150, width: 775, height: 250 } });
-action.images.add({ blob: new Uint8Array(await fs.readFile('reports/screenshots/result-card.png')), contentType: 'image/png', alt: 'Номер сервиса и выданный доступ', fit: 'contain', position: { left: 430, top: 410, width: 775, height: 210 } });
+text(action, '01  Черновик', 470, 180, 620, 48, 32, true, color.green);
+text(action, 'Проверка ресурса и причины\nдо отправки заявки', 470, 240, 620, 80, 27);
+text(action, '02  Подтверждение', 470, 355, 620, 48, 32, true, color.green);
+text(action, 'Отдельная операция после явного действия стажёра', 470, 415, 620, 70, 27);
+text(action, '03  Результат', 470, 520, 620, 48, 32, true, color.green);
+text(action, 'Номер сервиса, статус pending / granted / rejected\nи сохранение результата после обновления', 470, 580, 680, 70, 24);
 
 const architecture = slide('Архитектура и интеграции');
 text(architecture, 'React + TypeScript', 72, 180, 540, 60, 35, true, color.green);
@@ -50,9 +53,9 @@ text(architecture, 'GigaChat и HTTP-сервис', 700, 420, 500, 60, 35, true,
 text(architecture, 'Модель выбирает инструмент.\nСервис возвращает номер и статус.', 700, 490, 500, 120, 27);
 architecture.speakerNotes.text = 'Пять инструментов: get_onboarding_plan, search_knowledge, list_access_resources, draft_access_request, get_access_request_status. Подтверждение отправки — отдельная серверная операция. OAuth, TLS и нативные функции: https://developers.sber.ru/docs/ru/gigachat/api/reference/rest/gigachat-api';
 
-const coverage = JSON.parse(await fs.readFile('reports/coverage.json', 'utf8'));
+const coverage = JSON.parse(await fs.readFile('docs/coverage-report.json', 'utf8'));
 let live = null;
-try { live = JSON.parse((await fs.readFile('reports/gigachat-container.json', 'utf8')).replace(/^\uFEFF/, '')); } catch {}
+try { live = JSON.parse((await fs.readFile('docs/gigachat-report.json', 'utf8')).replace(/^\uFEFF/, '')); } catch {}
 const verification = slide('Проверка работающего прототипа');
 text(verification, `${coverage.total.percent}%`, 72, 175, 600, 120, 86, true, color.green);
 text(verification, 'Покрытие инструментированных строк\nGo и исполняемых строк React', 72, 305, 610, 95, 28);
@@ -65,7 +68,7 @@ const effect = slide('Проверка пользы на стажёрах');
 text(effect, 'Гипотеза', 72, 180, 1100, 55, 34, true, color.green);
 text(effect, 'Стажёр быстрее выполняет организационную задачу\nи реже обращается за повторным объяснением.', 72, 250, 1100, 110, 30);
 text(effect, 'Пилот', 72, 410, 1100, 55, 34, true, color.green);
-text(effect, 'Равноценные задачи с помощником и по исходным материалам.\nИзмеряем время, успешность и обращения за помощью.\nПользовательское исследование ещё не проведено.', 72, 480, 1100, 150, 28);
+text(effect, 'Равноценные задачи с помощником и по исходным материалам.\nСобытия: plan_opened, question_asked, source_shown,\nrequest_confirmed, request_result. Исследование ещё не проведено.', 72, 480, 1100, 150, 28);
 effect.speakerNotes.text = 'Протокол: docs/product-validation.md. Менять порядок условий между участниками, отделять ожидание сервиса от активного времени, указывать размер и ограничения выборки.';
 
 await fs.mkdir('output/pdf', { recursive: true });

@@ -14,6 +14,8 @@ import (
 
 	"onbo/internal/config"
 	"onbo/internal/core"
+	"onbo/internal/mcp"
+	"onbo/internal/metrics"
 )
 
 const (
@@ -43,6 +45,8 @@ const (
 	routeGETAPIRequests              = "GET /api/requests"
 	routeGETAPIResources             = "GET /api/resources"
 	routeGETAPISession               = "GET /api/session"
+	routeGETAPIMCPTools              = "GET /api/mcp/tools"
+	routePOSTAPIEvents               = "POST /api/events"
 	routeGETHealthz                  = "GET /healthz"
 	routePOSTAPIChat                 = "POST /api/chat"
 	routePOSTAPIDemoRequestsIDStatus = "POST /api/demo/requests/{id}/status"
@@ -61,6 +65,7 @@ type Server struct {
 	sessions Sessions
 	agent    core.ChatAgent
 	config   Config
+	mcpTools *mcp.Registry
 	mux      *http.ServeMux
 }
 type userKey struct{}
@@ -80,7 +85,7 @@ func NewServer(store *Store, sessions Sessions, agent core.ChatAgent, settings C
 	if settings.SessionTTL == 0 {
 		settings.SessionTTL = defaults.Redis.SessionTTL
 	}
-	server := &Server{store: store, sessions: sessions, agent: agent, config: settings, mux: http.NewServeMux()}
+	server := &Server{store: store, sessions: sessions, agent: agent, config: settings, mcpTools: mcp.NewRegistry(), mux: http.NewServeMux()}
 	server.mux.HandleFunc(routeGETHealthz, server.healthHandler)
 	server.mux.HandleFunc(routeGETAPIProfiles, func(responseWriter http.ResponseWriter, request *http.Request) {
 		if !server.config.DemoMode {
@@ -93,8 +98,12 @@ func NewServer(store *Store, sessions Sessions, agent core.ChatAgent, settings C
 		writeJSONResponse(responseWriter, http.StatusOK, map[string]any{"demoMode": server.config.DemoMode, "llmMode": server.config.LLMMode})
 	})
 	server.mux.HandleFunc(routePOSTAPISession, server.createSessionHandler)
+	server.mux.HandleFunc(routePOSTAPIEvents, server.requireSession(server.recordMetricEventHandler))
 	server.mux.HandleFunc(routeGETAPISession, server.requireSession(func(responseWriter http.ResponseWriter, request *http.Request) {
 		writeJSONResponse(responseWriter, http.StatusOK, authenticatedUser(request))
+	}))
+	server.mux.HandleFunc(routeGETAPIMCPTools, server.requireSession(func(responseWriter http.ResponseWriter, request *http.Request) {
+		writeJSONResponse(responseWriter, http.StatusOK, server.mcpTools.Tools(request.Context()))
 	}))
 	server.mux.HandleFunc(routeDELETEAPISession, server.requireSession(server.deleteSessionHandler))
 	server.mux.HandleFunc(routeGETAPIPlan, server.requireSession(func(responseWriter http.ResponseWriter, request *http.Request) {
@@ -138,6 +147,22 @@ func NewServer(store *Store, sessions Sessions, agent core.ChatAgent, settings C
 	})
 	server.mux.HandleFunc("/", server.serveFrontend)
 	return server
+}
+
+func (server *Server) recordMetricEventHandler(responseWriter http.ResponseWriter, request *http.Request) {
+	var requestBody struct {
+		Name     string            `json:"name"`
+		Metadata map[string]string `json:"metadata"`
+	}
+	if !readJSONRequest(responseWriter, request, &requestBody) {
+		return
+	}
+	err := server.store.RecordMetricEvent(request.Context(), authenticatedUser(request), metrics.Event{Name: requestBody.Name, Metadata: requestBody.Metadata})
+	if err != nil {
+		writeOperationResponse(responseWriter, nil, err)
+		return
+	}
+	responseWriter.WriteHeader(http.StatusNoContent)
 }
 func (server *Server) ServeHTTP(responseWriter http.ResponseWriter, request *http.Request) {
 	responseWriter.Header().Set(headerContentTypeOptions, contentTypeNoSniff)
