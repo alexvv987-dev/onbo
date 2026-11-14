@@ -2,6 +2,18 @@
 .idea/
 .vscode/
 
+# Local development dependencies
+node_modules/
+web/dist/
+web/coverage/
+reports/
+*.exe
+*.tsbuildinfo
+certs/
+agent-coverage.out
+output/video/raw/
+output/*.zip
+
 # Local environment and credentials
 .env
 .env.*
@@ -12,6 +24,9 @@
 
 # Temporary files and reports
 tmp/
+/roadmap.md
+/AGENTS.md
+/README-reference.md
 *.log
 coverage/
 coverage.out
