@@ -229,13 +229,16 @@ export default function App() {
       <header className="topbar">
         <a href="/" className="brand" aria-label="Онбо, главная">
           <span className="brand-mark" aria-hidden="true">
-            о<span />
+	            <i />
+	            <i />
+	            <i />
+	            <i />
           </span>
           онбо<span className="brand-dot">.</span>
         </a>
         <div className="header-context">
           <span className="header-divider" />
-          <span>Твой первый шаг — уже не в одиночку</span>
+          <span>Помощь · Инструкции · Доступы</span>
         </div>
         <div className="header-right">
           <span className="demo-tag">
